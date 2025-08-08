@@ -1,0 +1,49 @@
+# MapReduce with Java
+sudo su - hadoop
+start-all.sh
+
+mkdir bdafinalass
+cd bdafinalass
+
+# load the dataset from S3 bucket 
+aws s3 cp s3://bdadataset/Books_rating.csv .
+
+# Load the dataset to HDFS (Hadoop File System)
+# Creates a directory in HDFS to store your dataset.
+hdfs dfs -mkdir -p /bdafinalass
+
+# Uploads (puts) your local file Books_rating.csv into HDFS under the path /bdafinalass/.
+hdfs dfs -put -f Books_rating.csv /bdafinalass/
+
+# At bdafinalass, create two new directories 
+# One is src 
+mkdir src
+# Another one is classes
+mkdir classes
+
+# Change directory to src to script java files
+nano ReviewCountMapper.java
+nano ReviewCountReducer.java
+nano ReviewCountDriver.java
+
+# Back to the bdafinalass directory
+cd .. 
+
+# Compile all the .java files into .class files inside the classes folder.
+javac -classpath `hadoop classpath` -d classes src/*.java
+
+# Create the JAR file
+jar cvf reviewcount.jar -C classes/ .
+
+# Run the MapReduce job
+hadoop jar reviewcount.jar ReviewCountDriver /bdafinalass/Books_rating.csv /bdafinalass/output_top10
+
+# Check and see whether the output_top10 is inside our HDFS or not
+hdfs dfs -ls /bdafinalass
+
+# Once is inside, check what is inside the folder of output_top10
+hdfs dfs -ls /bdafinalass/output_top10
+
+# View the results
+hdfs dfs -cat /bdafinalass/output_top10/part-r-00000
+
