@@ -1,4 +1,4 @@
-Spark 
+# Spark 
 # At the MapReduce, we already loaded our dataset from s3 bucket, and also laoded it to our HDFS. 
 
 sudo su - hadoop
