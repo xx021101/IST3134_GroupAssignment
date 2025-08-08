@@ -1,1 +1,51 @@
+Spark 
+# At the MapReduce, we already loaded our dataset from s3 bucket, and also laoded it to our HDFS. 
+
+sudo su - hadoop
+start-all.sh
+cd bdafinalass
+
+#  Launch the interactive PySpark shell
+pyspark
+
+# Import the required libraries 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, desc
+
+# Define the Path to the Dataset in HDFS
+path = "hdfs:///bdafinalass/Books_rating.csv"
+
+# Read the CSV File to a dataframe
+df = spark.read \     
+    .option("header", "true") \
+    .option("inferSchema", "true") \
+    .csv(path)
+
+# Preview the first 5 rows of the dataframe
+df.show(5)
+
+# Normalize the title of the books 
+# Imports key PySpark functions
+From pyspark.sql.functions import col,lowe, trim,regexp_replace,desc
+
+# Normalization of title (lowercases, remove punctuation, remove extra spaces)
+df_clean = df.withColumn(
+    "normalized_title",
+    trim(
+        regexp_replace(
+            lower(col("title")),
+            r"[^a-z0-9\s]",  # remove non-alphanumeric except spaces
+            ""
+        )
+    )
+)
+
+# Group by the normalized title 
+review_counts = df_clean.groupBy("normalized_title").count()
+
+# Get the top 10 by count 
+top10_books = review_counts.orderBy(desc(“count”)).limit(10)
+
+# Show the results
+top10_books.show(truncate=False) 
 
